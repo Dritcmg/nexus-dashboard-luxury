@@ -1,8 +1,7 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ClientData } from '../types';
+import type { ClientData } from '../types';
 import { GLOBAL_PIE_DATA } from '../mocks/data';
 import { cn } from '../utils/cn';
 

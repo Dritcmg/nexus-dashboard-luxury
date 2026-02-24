@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster, toast } from 'sonner';
 
-import { ClientKey, Tab, ClientData } from './types';
+import type { ClientKey, Tab, ClientData } from './types';
 import { MOCK_DATA } from './mocks/data';
 
 import { Sidebar } from './components/Sidebar';

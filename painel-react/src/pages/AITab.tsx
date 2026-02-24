@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { BrainCircuit, Zap, CheckCircle2 } from 'lucide-react';
-import { ClientData } from '../types';
+import type { ClientData } from '../types';
 
 export const AITab = ({ data }: { data: ClientData }) => {
     const analysis = data.aiAnalysis;

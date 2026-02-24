@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Wallet, CheckCircle2, AlertCircle, Receipt, FileCheck2 } from 'lucide-react';
-import { ClientData } from '../types';
+import type { ClientData } from '../types';
 import { cn } from '../utils/cn';
 
 interface Props {

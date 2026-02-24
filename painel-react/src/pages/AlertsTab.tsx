@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Bell, AlertTriangle, AlertCircle, Info } from 'lucide-react';
-import { ClientData } from '../types';
+import type { ClientData } from '../types';
 import { cn } from '../utils/cn';
 
 export const AlertsTab = ({ data }: { data: ClientData }) => {

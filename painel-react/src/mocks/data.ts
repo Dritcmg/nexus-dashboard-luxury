@@ -1,4 +1,4 @@
-import { ClientData, ChartData, Alert, AIAnalysis } from '../types';
+import type { ClientData, ChartData } from '../types';
 
 const generateChartData = (baseGoogle: number, baseMeta: number, vol: number = 30): ChartData[] => {
     return Array.from({ length: vol }).map((_, i) => ({

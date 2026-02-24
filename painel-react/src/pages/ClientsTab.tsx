@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, TrendingUp, TrendingDown, Target } from 'lucide-react';
 import { MOCK_DATA } from '../mocks/data';
