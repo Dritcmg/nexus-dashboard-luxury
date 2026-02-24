@@ -1,7 +1,6 @@
-import React from 'react';
 import { User } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ClientData } from '../types';
+import type { ClientData } from '../types';
 import { cn } from '../utils/cn';
 
 interface RightPanelProps {

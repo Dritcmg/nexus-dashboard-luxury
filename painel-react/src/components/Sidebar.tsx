@@ -1,7 +1,6 @@
-import React from 'react';
-import { Menu, Home, Mail, User, PieChart, Bell, Settings, Activity, BrainCircuit, Users } from 'lucide-react';
+import { Menu, Home, PieChart, Bell, Settings, BrainCircuit, Users } from 'lucide-react';
 import { cn } from '../utils/cn'; // Assuming we'll make a cn.ts util
-import { Tab } from '../types';
+import type { Tab } from '../types';
 
 interface SidebarProps {
     activeTab: Tab;

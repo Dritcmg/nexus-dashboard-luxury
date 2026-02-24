@@ -1,6 +1,5 @@
-import React from 'react';
 import { Menu, Search, Sparkles, ChevronDown } from 'lucide-react';
-import { ClientKey } from '../types';
+import type { ClientKey } from '../types';
 import { MOCK_DATA } from '../mocks/data';
 
 interface HeaderProps {
