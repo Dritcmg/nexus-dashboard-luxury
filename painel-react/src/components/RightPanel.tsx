@@ -1,7 +1,6 @@
 import { User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip as RechartsTooltip } from 'recharts';
 import type { ClientData } from '../types';
-import { cn } from '../utils/cn';
 
 interface RightPanelProps {
     clientData: ClientData;
@@ -40,27 +39,41 @@ export const RightPanel = ({ clientData, clientName }: RightPanelProps) => {
             <div className="w-full">
                 <h3 className="text-sm font-bold mb-6 text-indigo-50">Overall Stats</h3>
                 <div className="space-y-6">
-                    {[
-                        { name: 'Google Search Ads', percent: `${Math.floor(Math.random() * 40 + 40)}%`, color: 'bg-[#4285F4]' },
-                        { name: 'Meta Ads (Insta/FB)', percent: `${Math.floor(Math.random() * 40 + 40)}%`, color: 'bg-[#EA4335]' },
-                        { name: 'TikTok Ads', percent: `${Math.floor(Math.random() * 30 + 10)}%`, color: 'bg-[#FBBC05]' },
-                        { name: 'LinkedIn B2B', percent: `${Math.floor(Math.random() * 30 + 10)}%`, color: 'bg-[#34A853]' },
-                    ].map((stat, i) => (
-                        <div key={i} className="group cursor-default">
-                            <div className="flex justify-between items-center mb-2">
-                                <p className="text-xs text-indigo-100 font-medium group-hover:text-white transition-colors">{stat.name}</p>
-                                <span className="text-[10px] text-indigo-300">{stat.percent}</span>
+                    <div className="h-40 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={clientData.platformDistribution}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={40}
+                                    outerRadius={60}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                    stroke="none"
+                                >
+                                    {clientData.platformDistribution.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <RechartsTooltip
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+                                    itemStyle={{ color: '#1F2937', fontWeight: 'bold' }}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-col gap-2 mt-2">
+                        {clientData.platformDistribution.map((platform) => (
+                            <div key={platform.name} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: platform.color }}></span>
+                                    <span className="text-indigo-100 font-medium">{platform.name}</span>
+                                </div>
+                                <span className="font-bold text-white">{platform.value}%</span>
                             </div>
-                            <div className="w-full h-2 bg-black/10 rounded-full overflow-hidden">
-                                <motion.div
-                                    initial={{ width: 0 }}
-                                    animate={{ width: stat.percent }}
-                                    transition={{ duration: 1, delay: i * 0.1 }}
-                                    className={cn("h-full rounded-full", stat.color)}
-                                ></motion.div>
-                            </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

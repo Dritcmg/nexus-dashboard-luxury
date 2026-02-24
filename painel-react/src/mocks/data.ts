@@ -1,17 +1,24 @@
 import type { ClientData, ChartData } from '../types';
 
-const generateChartData = (baseGoogle: number, baseMeta: number, vol: number = 30): ChartData[] => {
+const generateChartData = (
+    baseGoogle: number,
+    baseMeta: number,
+    vol: number = 30,
+    googleModifier: (i: number) => number = () => 1,
+    metaModifier: (i: number) => number = () => 1
+): ChartData[] => {
     return Array.from({ length: vol }).map((_, i) => ({
         name: `Dia ${i + 1}`,
-        google: baseGoogle + Math.random() * (baseGoogle * 0.4) * (Math.random() > 0.5 ? 1 : -1),
-        meta: baseMeta + Math.random() * (baseMeta * 0.5) * (Math.random() > 0.5 ? 1 : -1),
+        google: baseGoogle * googleModifier(i) + Math.random() * (baseGoogle * 0.1) * (Math.random() > 0.5 ? 1 : -1),
+        meta: baseMeta * metaModifier(i) + Math.random() * (baseMeta * 0.1) * (Math.random() > 0.5 ? 1 : -1),
     }));
 };
 
 export const MOCK_DATA: Record<string, ClientData> = {
     'Incorporadora Alpha': {
         kpis: { spent: 458900.50, leads: 8240, cpl: 55.69, roas: 4.8, itemsDownloaded: 14205, percentage: 68 },
-        chartData: generateChartData(90, 110),
+        // Google Search is performing well (downward CPL trend), Meta is stable
+        chartData: generateChartData(90, 110, 30, (i) => 1 - (i * 0.015), () => 1),
         creatives: [
             { name: 'Vídeo Fachada 3D - Noturno (15s)', spent: 45000, cpl: 42.50, status: 'Escalar' },
             { name: 'Carrossel Plantas 3 Quartos', spent: 18500, cpl: 58.90, status: 'Manter' },
@@ -38,11 +45,17 @@ export const MOCK_DATA: Record<string, ClientData> = {
                 { title: 'Pausar Criativos Saturados', description: 'Desativar 3 anúncios em Display com baixa taxa de clique.', impact: '- R$ 1.2k de desperdício/dia' },
                 { title: 'Escalar Performance Max', description: 'Injetar 15% a mais do budget aprovado na campanha PMAX focada em Planta Baixa.', impact: '+ 45 Leads Qualificados estimados' }
             ]
-        }
+        },
+        platformDistribution: [
+            { name: 'Google Ads', value: 55, color: '#4285F4' },
+            { name: 'Meta Ads', value: 35, color: '#EA4335' },
+            { name: 'TikTok Ads', value: 10, color: '#FBBC05' }
+        ]
     },
     'Construtora Beta': {
         kpis: { spent: 125000.00, leads: 1350, cpl: 92.59, roas: 2.1, itemsDownloaded: 4100, percentage: 22 },
-        chartData: generateChartData(180, 150),
+        // Insight says Meta saturated (CPL going UP abruptly), Google stable
+        chartData: generateChartData(120, 100, 30, () => 1, (i) => 1 + (i * i * 0.002)),
         creatives: [
             { name: 'Promo Cliente Fiel - Desconto 5%', spent: 25000, cpl: 120.00, status: 'Trocar' },
             { name: 'Vídeo Obra Acelerada (Drone)', spent: 42000, cpl: 75.50, status: 'Escalar' },
@@ -65,11 +78,16 @@ export const MOCK_DATA: Record<string, ClientData> = {
                 { title: 'Remodelar Audiência', description: 'Duplicar públicos lookalikes usando base de compradores atualizada.', impact: '- 20% no CPL projetado' },
                 { title: 'Desativar Campanha Feirão', description: 'Pausar anúncios de Feirão e relançar sob nova oferta.', impact: 'Queda na fadiga visual' }
             ]
-        }
+        },
+        platformDistribution: [
+            { name: 'Meta Ads', value: 75, color: '#EA4335' },
+            { name: 'Google Ads', value: 25, color: '#4285F4' },
+        ]
     },
     'Residencial Gold': {
         kpis: { spent: 890000.00, leads: 22100, cpl: 40.27, roas: 8.5, itemsDownloaded: 56900, percentage: 94 },
-        chartData: generateChartData(40, 50),
+        // Insight says Global CPL reduced exponentially (Both going down)
+        chartData: generateChartData(60, 70, 30, (i) => 1 - (i * 0.02), (i) => 1 - (i * 0.015)),
         creatives: [
             { name: 'Lançamento Exclusivo - Black Card', spent: 245000, cpl: 32.10, status: 'Escalar' },
             { name: 'Tour Decorado Alto Padrão', spent: 132000, cpl: 38.50, status: 'Escalar' },
@@ -95,7 +113,12 @@ export const MOCK_DATA: Record<string, ClientData> = {
                 { title: 'Aumentar Lances em +10%', description: 'Dominar o topo da pesquisa no Google para concorrentes diretos.', impact: '+ Captura de Demanda Intencional' },
                 { title: 'Campanha de Retargeting Agressivo', description: 'Investir na base de abandonos de carrinho com oferta de fechamento rápido.', impact: 'Conversão acelerada em 3x' }
             ]
-        }
+        },
+        platformDistribution: [
+            { name: 'Google Ads', value: 45, color: '#4285F4' },
+            { name: 'Meta Ads', value: 40, color: '#EA4335' },
+            { name: 'LinkedIn Ads', value: 15, color: '#34A853' }
+        ]
     }
 };
 

@@ -38,19 +38,31 @@ export default function App() {
 
   const handleGenBoleto = (accName: string) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() < 0.15) {
+            reject(new Error('Saldo insuficiente ou limite transacional atingido na conta.'));
+          } else {
+            resolve(true);
+          }
+        }, 1500)
+      }),
       {
         loading: `Gerando Boleto para ${accName}...`,
         success: `Boleto enviado com sucesso para o cliente!`,
-        error: 'Erro ao gerar o boleto.',
+        error: (err) => `Erro na API: ${err.message}`,
       }
     );
   };
 
   const handleDownloadNF = (accName: string) => {
-    const toastId = toast.loading(`Processando Nota Fiscal de Serviço (NFS-e) para ${accName}...`);
+    const toastId = toast.loading(`Processando NFS-e na prefeitura para ${accName}...`);
     setTimeout(() => {
-      toast.success(`Download concluído! Verifique a pasta Downloads.`, { id: toastId });
+      if (Math.random() < 0.15) {
+        toast.error(`Falha ao emitir NF. Sistema municipal (Sefin) indisponível.`, { id: toastId });
+      } else {
+        toast.success(`Download concluído! Verifique a pasta Downloads.`, { id: toastId });
+      }
     }, 2000);
   };
 

@@ -56,4 +56,5 @@ export interface ClientData {
     iaInsight: string;
     alerts: Alert[];
     aiAnalysis: AIAnalysis;
+    platformDistribution: { name: string; value: number; color: string }[];
 }

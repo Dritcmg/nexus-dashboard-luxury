@@ -20,38 +20,62 @@ export const AlertsTab = ({ data }: { data: ClientData }) => {
             </div>
 
             <div className="bg-white rounded-[30px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
-                <h4 className="text-lg font-bold text-gray-800 mb-6">Últimas Detecções</h4>
+                <h4 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    Últimas Detecções do Sistema
+                    <span className="bg-indigo-100 text-indigo-700 text-xs py-1 px-3 rounded-full">{data.alerts.length}</span>
+                </h4>
                 <div className="space-y-4">
                     {data.alerts && data.alerts.length > 0 ? data.alerts.map((alert, index) => (
                         <motion.div
                             key={alert.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, x: -20, y: 10 }}
+                            animate={{ opacity: 1, x: 0, y: 0 }}
                             transition={{ delay: index * 0.1 }}
                             className={cn(
-                                "p-5 rounded-2xl border flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group transition-all",
-                                alert.type === 'critical' ? "bg-[#EA4335]/5 border-[#EA4335]/20 hover:border-[#EA4335]/40" :
-                                    alert.type === 'warning' ? "bg-[#FBBC05]/5 border-[#FBBC05]/20 hover:border-[#FBBC05]/40" :
-                                        "bg-[#4285F4]/5 border-[#4285F4]/20 hover:border-[#4285F4]/40"
+                                "p-5 rounded-2xl border flex flex-col md:flex-row gap-4 items-start md:items-center justify-between group transition-all duration-300 relative overflow-hidden",
+                                alert.type === 'critical' ? "bg-[#EA4335]/5 border-[#EA4335]/20 hover:border-[#EA4335]/40 hover:shadow-[0_8px_30px_rgba(234,67,53,0.1)]" :
+                                    alert.type === 'warning' ? "bg-[#FBBC05]/5 border-[#FBBC05]/20 hover:border-[#FBBC05]/40 hover:shadow-[0_8px_30px_rgba(251,188,5,0.1)]" :
+                                        "bg-[#4285F4]/5 border-[#4285F4]/20 hover:border-[#4285F4]/40 hover:shadow-[0_8px_30px_rgba(66,133,244,0.1)]"
                             )}
                         >
-                            <div className="flex items-center gap-4">
+                            {/* Subtle Side Bar indicator */}
+                            <div className={cn(
+                                "absolute left-0 top-0 bottom-0 w-1.5",
+                                alert.type === 'critical' ? "bg-[#EA4335]" :
+                                    alert.type === 'warning' ? "bg-[#FBBC05]" :
+                                        "bg-[#4285F4]"
+                            )}></div>
+
+                            <div className="flex items-center gap-4 pl-2">
                                 <div className={cn(
-                                    "p-2.5 rounded-xl flex-shrink-0",
-                                    alert.type === 'critical' ? "bg-[#EA4335]/10 text-[#EA4335]" :
-                                        alert.type === 'warning' ? "bg-[#FBBC05]/10 text-yellow-600" :
-                                            "bg-[#4285F4]/10 text-[#4285F4]"
+                                    "p-3 rounded-2xl flex-shrink-0 shadow-sm",
+                                    alert.type === 'critical' ? "bg-white text-[#EA4335] shadow-[#EA4335]/20" :
+                                        alert.type === 'warning' ? "bg-white text-[#FBBC05] shadow-[#FBBC05]/20" :
+                                            "bg-white text-[#4285F4] shadow-[#4285F4]/20"
                                 )}>
-                                    {alert.type === 'critical' && <AlertTriangle className="w-6 h-6" />}
-                                    {alert.type === 'warning' && <AlertCircle className="w-6 h-6" />}
-                                    {alert.type === 'info' && <Info className="w-6 h-6" />}
+                                    {alert.type === 'critical' && <AlertTriangle className="w-7 h-7" strokeWidth={2.5} />}
+                                    {alert.type === 'warning' && <AlertCircle className="w-7 h-7" strokeWidth={2.5} />}
+                                    {alert.type === 'info' && <Info className="w-7 h-7" strokeWidth={2.5} />}
                                 </div>
                                 <div>
-                                    <h5 className="font-bold text-gray-800 text-base md:text-lg">{alert.message}</h5>
-                                    <p className="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-1">{alert.time}</p>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className={cn(
+                                            "text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md",
+                                            alert.type === 'critical' ? "bg-[#EA4335]/10 text-[#EA4335]" :
+                                                alert.type === 'warning' ? "bg-[#FBBC05]/10 text-[#FBBC05]" :
+                                                    "bg-[#4285F4]/10 text-[#4285F4]"
+                                        )}>
+                                            {alert.type === 'critical' ? 'Ação Exigida' : alert.type === 'warning' ? 'Atenção' : 'Aviso Legal'}
+                                        </span>
+                                    </div>
+                                    <h5 className="font-bold text-gray-800 text-base md:text-lg leading-snug">{alert.message}</h5>
+                                    <p className="text-sm font-semibold text-gray-500 mt-2 flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-gray-300"></span>
+                                        Registrado {alert.time}
+                                    </p>
                                 </div>
                             </div>
-                            <button className="text-sm font-bold text-indigo-600 hover:text-indigo-800 bg-white border px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all self-stretch md:self-auto">
+                            <button className="text-sm font-bold text-indigo-600 hover:text-white bg-white hover:bg-indigo-600 border px-6 py-3 rounded-xl shadow-sm hover:shadow-lg transition-all self-stretch md:self-auto group-hover:scale-105">
                                 Detalhes
                             </button>
                         </motion.div>

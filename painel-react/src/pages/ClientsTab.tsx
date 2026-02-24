@@ -34,23 +34,37 @@ export const ClientsTab = () => {
                             transition={{ delay: index * 0.1 }}
                             className="bg-white rounded-[30px] p-6 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col xl:flex-row justify-between xl:items-center gap-8 group hover:border-indigo-500/30 transition-colors"
                         >
-                            <div className="w-full xl:w-1/3">
+                            <div className="w-full xl:w-2/5">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className="bg-gray-50 p-2.5 rounded-xl border border-gray-100">
-                                        <Target className="w-5 h-5 text-gray-500" />
+                                    <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100 shadow-sm">
+                                        <Target className="w-6 h-6 text-indigo-600" />
                                     </div>
-                                    <h4 className="text-xl font-bold text-indigo-900">{clientName}</h4>
+                                    <h4 className="text-2xl font-black text-indigo-900 tracking-tight">{clientName}</h4>
                                 </div>
-                                <p className="text-sm text-gray-400 font-bold tracking-widest uppercase mt-4">Saúde da Conta</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    {healthy ? <TrendingUp className="w-5 h-5 text-[#34A853]" /> : <TrendingDown className="w-5 h-5 text-[#EA4335]" />}
-                                    <span className={cn("text-lg font-black", healthy ? "text-[#34A853]" : "text-[#EA4335]")}>
-                                        {healthy ? "Excelente" : "Atenção"}
-                                    </span>
+
+                                <div className="mt-6 p-5 rounded-2xl bg-gray-50/50 border border-gray-100 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-white rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 opacity-60"></div>
+                                    <p className="text-xs text-gray-500 font-bold tracking-widest uppercase mb-3">Status de Saúde da Conta</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className={cn(
+                                            "flex items-center justify-center p-2 rounded-xl",
+                                            healthy ? "bg-[#34A853]/10 text-[#34A853]" : "bg-[#EA4335]/10 text-[#EA4335]"
+                                        )}>
+                                            {healthy ? <TrendingUp className="w-6 h-6" /> : <TrendingDown className="w-6 h-6" />}
+                                        </span>
+                                        <div>
+                                            <span className={cn("text-xl font-black block", healthy ? "text-[#34A853]" : "text-[#EA4335]")}>
+                                                {healthy ? "Excelente" : "Atenção Necessária"}
+                                            </span>
+                                            <span className="text-sm font-medium text-gray-500">
+                                                {healthy ? "ROAS acima da meta estipulada" : "Riscos de fadiga identificados"}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-2/3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full xl:w-3/5">
                                 <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">Gasto Mensal</p>
                                     <p className="text-xl font-black text-gray-800">{formatCurrency(clientData.kpis.spent)}</p>
