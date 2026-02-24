@@ -11,9 +11,7 @@ import {
   Settings,
   Sparkles,
   TrendingUp,
-  Users,
-  Target,
-  Activity,
+  Wallet,
   Receipt,
   CloudDownload,
   CheckCircle2,
@@ -488,7 +486,7 @@ export default function App() {
                       </div>
 
                       <div className="grid grid-cols-1 gap-6">
-                        {data.finance.map((acc, index) => (
+                        {data.finance.map((acc) => (
                           <motion.div
                             key={acc.account}
                             initial={{ opacity: 0, scale: 0.98 }}
