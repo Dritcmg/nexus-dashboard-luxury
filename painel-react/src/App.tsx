@@ -1,10 +1,14 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Toaster, toast } from 'sonner';
 import {
-  LayoutDashboard,
-  Wallet,
-  Settings,
+  Menu,
+  Home,
+  Mail,
+  User,
+  PieChart as PieChartIcon,
   Bell,
+  Settings,
   Sparkles,
   TrendingUp,
   Users,
@@ -13,7 +17,9 @@ import {
   Receipt,
   CloudDownload,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Search,
+  ChevronDown
 } from 'lucide-react';
 import {
   AreaChart,
@@ -21,26 +27,71 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// Helper for Tailwind classes
+// --- TYPES & INTERFACES ---
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- MOCK DATA ---
-const MOCK_DATA = {
+export interface KpiProps {
+  title: string;
+  value: string;
+  trend?: string;
+  isPositive?: boolean;
+  color?: string;
+  delay: number;
+}
+
+export interface ChartData {
+  name: string;
+  google: number;
+  meta: number;
+}
+
+export interface Creative {
+  name: string;
+  spent: number;
+  cpl: number;
+  status: 'Escalar' | 'Trocar' | 'Manter';
+  icon: string;
+}
+
+export interface FinanceAccount {
+  account: string;
+  balance: number;
+  approved: number;
+  status: 'Conciliado' | 'Pendente' | 'Divergência';
+}
+
+export interface ClientData {
+  kpis: { spent: number; leads: number; cpl: number; roas: number; itemsDownloaded: number; percentage: number };
+  chartData: ChartData[];
+  creatives: Creative[];
+  finance: FinanceAccount[];
+  iaInsight: string;
+}
+
+// --- MOCK DATA GENERATOR ---
+const generateChartData = (baseGoogle: number, baseMeta: number): ChartData[] => {
+  return Array.from({ length: 6 }).map((_, i) => ({
+    name: `0${i + 1}`,
+    google: baseGoogle + Math.random() * (baseGoogle * 0.8),
+    meta: baseMeta + Math.random() * (baseMeta * 0.8),
+  }));
+};
+
+const MOCK_DATA: Record<string, ClientData> = {
   'Incorporadora Alpha': {
-    kpis: { spent: 145000, leads: 2340, cpl: 61.96, roas: 4.2 },
-    chartData: Array.from({ length: 15 }).map((_, i) => ({
-      name: `Dia ${i + 1}`,
-      google: 50 + Math.random() * 20,
-      meta: 65 + Math.random() * 25,
-    })),
+    kpis: { spent: 145000, leads: 2340, cpl: 61.96, roas: 4.2, itemsDownloaded: 12345, percentage: 43 },
+    chartData: generateChartData(1000, 1500),
     creatives: [
       { name: 'Fachada 3D - Noturno', spent: 12000, cpl: 45, status: 'Escalar', icon: '🏙️' },
       { name: 'Tour Virtual 360', spent: 8500, cpl: 52, status: 'Manter', icon: '🎥' },
@@ -53,12 +104,8 @@ const MOCK_DATA = {
     iaInsight: "Baseado nos dados em tempo real, recomendamos realocar 15% da verba do Meta para o Google Search. O público 'Investidores Premium' atingiu seu menor CPL (R$ 41,20) nas últimas 48 horas.",
   },
   'Construtora Beta': {
-    kpis: { spent: 89000, leads: 980, cpl: 90.81, roas: 2.8 },
-    chartData: Array.from({ length: 15 }).map((_, i) => ({
-      name: `Dia ${i + 1}`,
-      google: 80 + Math.random() * 15,
-      meta: 90 + Math.random() * 20,
-    })),
+    kpis: { spent: 89000, leads: 980, cpl: 90.81, roas: 2.8, itemsDownloaded: 8432, percentage: 28 },
+    chartData: generateChartData(1200, 1100),
     creatives: [
       { name: 'Promo Cliente Fiel', spent: 5000, cpl: 110, status: 'Trocar', icon: '⭐' },
       { name: 'Vídeo Obra Acelerada', spent: 12000, cpl: 85, status: 'Escalar', icon: '🏗️' },
@@ -70,12 +117,8 @@ const MOCK_DATA = {
     iaInsight: "Alerta de Fadiga Detectado: A campanha 'Vídeo Obra Acelerada' saturou no Meta Ads. Sugerimos pausa temporária e injeção de novas variações curtas focadas em ROI imediato.",
   },
   'Residencial Gold': {
-    kpis: { spent: 210000, leads: 4500, cpl: 46.66, roas: 6.5 },
-    chartData: Array.from({ length: 15 }).map((_, i) => ({
-      name: `Dia ${i + 1}`,
-      google: 35 + Math.random() * 10,
-      meta: 45 + Math.random() * 15,
-    })),
+    kpis: { spent: 210000, leads: 4500, cpl: 46.66, roas: 6.5, itemsDownloaded: 24500, percentage: 89 },
+    chartData: generateChartData(800, 2000),
     creatives: [
       { name: 'Lançamento Exclusivo', spent: 45000, cpl: 38, status: 'Escalar', icon: '🗝️' },
       { name: 'Tour Decorado', spent: 32000, cpl: 42, status: 'Escalar', icon: '🛋️' },
@@ -92,313 +135,420 @@ const MOCK_DATA = {
 type ClientKey = keyof typeof MOCK_DATA;
 type Tab = 'performance' | 'finance';
 
-// --- COMPONENTS ---
+// --- PIE CHART DATA ---
+const pieData = [
+  { name: 'Google', value: 400, color: '#4285F4' }, // Blue
+  { name: 'Meta', value: 300, color: '#EA4335' }, // Red
+  { name: 'TikTok', value: 300, color: '#FBBC05' }, // Yellow
+  { name: 'LinkedIn', value: 200, color: '#34A853' }, // Green
+];
 
+// --- COMPONENTS ---
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(value);
 
 const Sidebar = ({ activeTab, setActiveTab }: { activeTab: Tab, setActiveTab: (t: Tab) => void }) => (
-  <aside className="fixed left-0 top-0 h-screen w-20 md:w-64 border-r border-dark-border bg-dark-bg/80 backdrop-blur-xl z-50 flex flex-col">
-    <div className="h-20 flex items-center justify-center md:justify-start md:px-6 border-b border-dark-border">
-      <div className="text-2xl font-bold tracking-tighter text-gradient flex items-center gap-2">
-        <Sparkles className="w-6 h-6 text-brand-blue" />
-        <span className="hidden md:block">NEXUS<span className="font-light text-slate-400">OS</span></span>
-      </div>
+  <aside className="fixed left-0 top-0 h-screen w-20 md:w-24 bg-[#4F46E5] z-50 flex flex-col items-center py-6 shadow-xl">
+    {/* Hamburger Menu top */}
+    <div className="mb-12 cursor-pointer text-white">
+      <Menu className="w-8 h-8" strokeWidth={2.5} />
     </div>
 
-    <nav className="flex-1 py-8 flex flex-col gap-2 px-3 focus:outline-none">
+    <nav className="flex-1 flex flex-col gap-8 w-full items-center">
       <button
         onClick={() => setActiveTab('performance')}
         className={cn(
-          "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
-          activeTab === 'performance' ? "bg-brand-electric/10 text-brand-blue" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+          "p-3 rounded-2xl transition-all duration-300 relative",
+          activeTab === 'performance' ? "bg-white/20 text-white" : "text-indigo-200 hover:text-white hover:bg-white/10"
         )}>
-        <LayoutDashboard className="w-5 h-5" />
-        <span className="hidden md:block font-medium">Performance</span>
+        <Home className="w-6 h-6" fill="currentColor" strokeWidth={0} />
       </button>
+
+      <button className="p-3 rounded-2xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all duration-300 relative">
+        <Mail className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-[#4F46E5]"></span>
+      </button>
+
+      <button className="p-3 rounded-2xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all duration-300">
+        <User className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+      </button>
+
       <button
         onClick={() => setActiveTab('finance')}
         className={cn(
-          "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300",
-          activeTab === 'finance' ? "bg-brand-electric/10 text-brand-blue" : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+          "p-3 rounded-2xl transition-all duration-300",
+          activeTab === 'finance' ? "bg-white/20 text-white" : "text-indigo-200 hover:text-white hover:bg-white/10"
         )}>
-        <Wallet className="w-5 h-5" />
-        <span className="hidden md:block font-medium">B2B Finance Auth</span>
+        <PieChartIcon className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+      </button>
+
+      <button className="p-3 rounded-2xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all duration-300 relative">
+        <Bell className="w-6 h-6" fill="currentColor" strokeWidth={0} />
+        <span className="absolute top-2 right-3 w-2 h-2 bg-yellow-400 rounded-full border border-[#4F46E5]"></span>
       </button>
     </nav>
 
-    <div className="p-4 border-t border-dark-border">
-      <button className="flex items-center justify-center w-full gap-3 px-3 py-3 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors">
-        <Settings className="w-5 h-5" />
-        <span className="hidden md:block font-medium">Settings</span>
+    <div className="mt-auto">
+      <button className="p-3 rounded-2xl text-indigo-200 hover:text-white hover:bg-white/10 transition-all duration-300">
+        <Settings className="w-6 h-6" fill="currentColor" strokeWidth={0} />
       </button>
     </div>
   </aside>
 );
 
 const Header = ({ client, setClient }: { client: ClientKey, setClient: (c: ClientKey) => void }) => (
-  <header className="h-20 border-b border-dark-border flex items-center justify-between px-6 bg-dark-bg/50 backdrop-blur-md sticky top-0 z-40">
+  <header className="h-24 flex items-center justify-between px-8 bg-transparent z-40">
     <div className="flex items-center gap-6">
-      <select
-        value={client}
-        onChange={(e) => setClient(e.target.value as ClientKey)}
-        className="bg-transparent border border-slate-800 text-slate-200 text-lg font-semibold rounded-lg px-4 py-2 focus:outline-none focus:border-brand-blue transition-colors appearance-none cursor-pointer hover:bg-slate-800/30"
-      >
-        {Object.keys(MOCK_DATA).map(key => (
-          <option key={key} value={key} className="bg-dark-bg">{key}</option>
-        ))}
-      </select>
+      <div className="text-2xl font-black text-indigo-600 tracking-tight flex items-center gap-2 mr-8">
+        <Sparkles className="w-6 h-6 text-brand-blue" />
+        ADSPainel-PRO
+      </div>
+
+      <div className="relative w-96 hidden lg:block">
+        <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          placeholder="Search Here"
+          className="w-full bg-white border-0 text-gray-600 text-sm rounded-full py-3 pl-12 pr-4 shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue/20"
+        />
+      </div>
     </div>
 
-    <div className="flex items-center gap-6">
-      <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full border border-slate-800 bg-slate-900/30 shadow-lg shadow-emerald-500/5">
-        <div className="relative flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-        </div>
-        <span className="text-sm font-medium text-slate-300">IA Status: Scanning...</span>
+    <div className="flex items-center gap-4">
+      <div className="relative">
+        <select
+          value={client}
+          onChange={(e) => setClient(e.target.value as ClientKey)}
+          className="appearance-none bg-white text-indigo-600 font-bold text-sm rounded-full py-2.5 pl-6 pr-10 shadow-sm cursor-pointer outline-none hover:bg-indigo-50 transition-colors border-0"
+        >
+          {Object.keys(MOCK_DATA).map(key => (
+            <option key={key} value={key}>{key}</option>
+          ))}
+        </select>
+        <ChevronDown className="w-4 h-4 text-indigo-600 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
       </div>
-      <button className="p-2 rounded-full bg-slate-800/50 text-slate-300 hover:text-white transition-colors relative">
-        <Bell className="w-5 h-5" />
-        <span className="absolute top-1 right-1 w-2 h-2 bg-brand-blue rounded-full"></span>
-      </button>
     </div>
   </header>
 );
 
-const KpiCard = ({ title, value, icon: Icon, delay }: any) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay, duration: 0.5 }}
-    className="glass-card p-6 flex items-start justify-between group hover:border-brand-blue/50 transition-colors"
-  >
-    <div>
-      <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-2">{title}</p>
-      <h3 className="text-3xl font-bold text-white tracking-tight">{value}</h3>
+const RightPanel = () => (
+  <div className="w-full lg:w-80 bg-[#4F46E5] text-white flex flex-col items-center py-10 px-8 rounded-l-[40px] shadow-2xl relative">
+    {/* Profile */}
+    <div className="relative mb-6">
+      <div className="w-32 h-32 rounded-full bg-white/20 p-2">
+        <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+          <User className="w-16 h-16 text-gray-400" fill="currentColor" />
+        </div>
+      </div>
+      <div className="absolute top-0 right-2 w-6 h-6 bg-[#00E676] rounded-full border-4 border-[#4F46E5]"></div>
     </div>
-    <div className="p-3 rounded-lg bg-slate-800/50 text-brand-blue group-hover:scale-110 group-hover:bg-brand-blue/10 transition-all">
-      <Icon className="w-6 h-6" />
+    <h2 className="text-2xl font-semibold mb-8">Jane Lauren</h2>
+
+    {/* Stats Row */}
+    <div className="flex w-full justify-between bg-indigo-900/40 p-5 rounded-2xl mb-10 text-center">
+      <div>
+        <p className="text-xs text-indigo-200 mb-1">Earning</p>
+        <p className="text-[#00E676] font-bold text-xl">$ 2314</p>
+        <p className="text-[10px] text-indigo-300 mt-1">Lorem Ipsum</p>
+      </div>
+      <div>
+        <p className="text-xs text-indigo-200 mb-1">Bonus</p>
+        <p className="text-[#00E676] font-bold text-xl">$ 200</p>
+        <p className="text-[10px] text-indigo-300 mt-1">Lorem Ipsum</p>
+      </div>
+      <div>
+        <p className="text-xs text-indigo-200 mb-1">Favorite</p>
+        <p className="text-[#00E676] font-bold text-xl">12,340</p>
+        <p className="text-[10px] text-indigo-300 mt-1">Lorem Ipsum</p>
+      </div>
+    </div>
+
+    {/* Overall Stats Progress Bars */}
+    <div className="w-full">
+      <h3 className="text-sm font-medium mb-6">Overall Stats</h3>
+      <div className="space-y-5">
+        {[
+          { name: 'Service 01', percent: '80%' },
+          { name: 'Service 02', percent: '65%' },
+          { name: 'Service 03', percent: '40%' },
+          { name: 'Service 04', percent: '90%' },
+          { name: 'Service 05', percent: '50%' },
+        ].map((stat, i) => (
+          <div key={i}>
+            <p className="text-xs mb-2 text-indigo-100">{stat.name}</p>
+            <div className="w-full h-2.5 bg-indigo-900/50 rounded-full overflow-hidden">
+              <div
+                className={cn("h-full rounded-full", i % 2 === 0 ? "bg-[#00E676]" : "bg-[#4285F4]")}
+                style={{ width: stat.percent }}
+              ></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const SkeletonScreen = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="space-y-6 w-full pointer-events-none"
+  >
+    <div className="h-64 rounded-2xl bg-gray-200 animate-pulse"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="h-48 rounded-2xl bg-gray-200 animate-pulse"></div>
+      <div className="h-48 rounded-2xl bg-gray-200 animate-pulse"></div>
     </div>
   </motion.div>
 );
 
-const CreativeBadge = ({ status }: { status: string }) => {
-  if (status === 'Escalar') {
-    return (
-      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-        PERFORMANCE ALTA - ESCALAR
-      </span>
-    );
-  }
-  if (status === 'Trocar') {
-    return (
-      <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 shadow-[0_0_10px_rgba(244,63,94,0.2)]">
-        SATURADO - TROCAR
-      </span>
-    );
-  }
-  return (
-    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-      ESTÁVEL - MANTER
-    </span>
-  );
-};
-
 // --- MAIN APP ---
-
 export default function App() {
   const [client, setClient] = useState<ClientKey>('Incorporadora Alpha');
   const [activeTab, setActiveTab] = useState<Tab>('performance');
+  const [isLoading, setIsLoading] = useState(false);
 
   const data = useMemo(() => MOCK_DATA[client], [client]);
 
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [client]);
+
+  const handleGenBoleto = (accName: string) => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Processando faturamento para ${accName}...`,
+        success: `Boleto de ${accName} enviado com sucesso!`,
+        error: 'Erro ao gerar o boleto.',
+      }
+    );
+  };
+
+  const handleDownloadNF = (accName: string) => {
+    const toastId = toast.loading(`Preparando Nota Fiscal: ${accName}...`);
+    setTimeout(() => {
+      toast.success(`Download de SIMULACAO_NFS_${accName}.pdf iniciado!`, { id: toastId });
+    }, 2000);
+  };
+
   return (
-    <div className="min-h-screen bg-dark-bg text-slate-200 font-sans selection:bg-brand-blue/30 overflow-hidden flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#F3F6F9] text-gray-800 font-sans selection:bg-brand-blue/30 overflow-hidden flex flex-col md:flex-row">
+      <Toaster position="bottom-right" className="!font-sans" />
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <main className="flex-1 md:ml-64 flex flex-col min-h-screen overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 md:ml-24 flex flex-col min-h-screen overflow-y-auto">
         <Header client={client} setClient={setClient} />
 
-        <div className="p-6 md:p-10 max-w-7xl mx-auto w-full">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={client + activeTab} // Triggers animation on client or tab change
-              initial={{ opacity: 0, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, filter: 'blur(10px)' }}
-              transition={{ duration: 0.4 }}
-              className="space-y-8"
-            >
+        <div className="flex-1 flex flex-col lg:flex-row w-full max-w-[1600px] mx-auto">
+          {/* Central Main Content Area */}
+          <main className="flex-1 px-8 pb-10">
+            <AnimatePresence mode="popLayout">
+              {isLoading ? (
+                <SkeletonScreen key="skeleton" />
+              ) : (
+                <motion.div
+                  key={`${client}-${activeTab}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
 
-              {/* IA CONSOLE - Always visible at top */}
-              <div className="relative p-[1px] rounded-2xl bg-gradient-to-r from-brand-blue via-indigo-500 to-purple-500 overflow-hidden shadow-[0_0_40px_rgba(59,130,246,0.15)] group">
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-blue to-purple-600 opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
-                <div className="relative glass-card p-6 md:p-8 rounded-2xl bg-slate-950/80 border-none">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Sparkles className="w-6 h-6 text-brand-blue animate-pulse" />
-                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                      Nexus IA Console
-                    </h2>
-                  </div>
-                  <p className="text-lg text-slate-300 leading-relaxed font-light">
-                    {data.iaInsight.split(/(Escalar|\+20%|15%|Meta|Google Search|Saturado)/g).map((part, i) =>
-                      ['Escalar', '+20%', '15%', 'Meta', 'Google Search', 'Saturado'].includes(part) ?
-                        <strong key={i} className="text-white font-semibold">{part}</strong> : part
-                    )}
-                  </p>
-                </div>
-              </div>
+                  {activeTab === 'performance' && (
+                    <>
+                      {/* Top Chart Area (Overview) */}
+                      <div className="white-card p-6 pb-2 h-[320px] flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                          <h3 className="text-lg font-bold text-indigo-900">Overview</h3>
+                          <button className="bg-indigo-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full flex items-center gap-1 shadow-sm">
+                            <ChevronDown className="w-3 h-3" /> All List
+                          </button>
+                        </div>
+                        <div className="flex-1 min-h-0 relative">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={data.chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                              <CartesianGrid strokeDasharray="0" stroke="#f1f5f9" vertical={false} />
+                              <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                              <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                              <RechartsTooltip
+                                contentStyle={{ backgroundColor: '#fff', borderColor: '#f1f5f9', borderRadius: '12px', color: '#1e293b', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                itemStyle={{ fontSize: '12px', fontWeight: 600 }}
+                              />
+                              <Area type="monotone" dataKey="meta" name="Service A" stroke="#0D9488" strokeWidth={2.5} fillOpacity={0} activeDot={{ r: 6 }} animationDuration={800} />
+                              <Area type="monotone" dataKey="google" name="Service B" stroke="#4F46E5" strokeWidth={2.5} fillOpacity={0} activeDot={{ r: 6 }} animationDuration={800} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
 
-              {activeTab === 'performance' && (
-                <>
-                  {/* KPIs */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 ml:grid-cols-4 gap-6">
-                    <KpiCard title="Investimento YTD" value={formatCurrency(data.kpis.spent)} icon={TrendingUp} delay={0.1} />
-                    <KpiCard title="Leads Capturados" value={data.kpis.leads.toLocaleString()} icon={Users} delay={0.2} />
-                    <KpiCard title="Target CPL" value={formatCurrency(data.kpis.cpl)} icon={Target} delay={0.3} />
-                    <KpiCard title="Global ROAS" value={`${data.kpis.roas}x`} icon={Activity} delay={0.4} />
-                  </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Top Ranking */}
+                        <div className="white-card p-6 relative">
+                          <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-6">Top Ranking</h3>
+                          <div className="space-y-4">
+                            {[
+                              { label: 'Adipisicing', val: '38%' },
+                              { label: 'Consectetuer', val: '19%' },
+                              { label: 'Dolor sit', val: '24%' },
+                              { label: 'Lorem ipsum', val: '45%' },
+                              { label: 'Sed diam', val: '38%' },
+                              { label: 'Nonummy', val: '61%' },
+                            ].map((item, i) => (
+                              <div key={i} className="flex justify-between items-center relative text-xs text-gray-500">
+                                <span>{item.label}</span>
+                                <div className="absolute left-24 right-10 top-1/2 border-b border-gray-200"></div>
+                                <span className="font-semibold text-gray-700">{item.val}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
 
-                  {/* CHART */}
-                  <div className="glass-card p-6 h-[400px]">
-                    <h3 className="text-lg font-bold text-white mb-6">Mapeamento de Custo Preditivo (CPL)</h3>
-                    <ResponsiveContainer width="100%" height="85%">
-                      <AreaChart data={data.chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorGoogle" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="colorMeta" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                        <XAxis dataKey="name" stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
-                        <YAxis stroke="#64748b" tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} tickFormatter={(v) => `R$${v}`} />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', color: '#f8fafc' }}
-                          itemStyle={{ color: '#e2e8f0' }}
-                          formatter={(value: any) => [formatCurrency(Number(value) || 0), undefined]}
-                        />
-                        <Area type="monotone" dataKey="meta" stroke="#8B5CF6" strokeWidth={3} fillOpacity={1} fill="url(#colorMeta)" activeDot={{ r: 6, strokeWidth: 0 }} />
-                        <Area type="monotone" dataKey="google" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#colorGoogle)" activeDot={{ r: 6, strokeWidth: 0 }} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* CREATIVES LIST */}
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-6">Performance de Criativos & Fadiga</h3>
-                    <div className="flex flex-col gap-4">
-                      {data.creatives.map((creative, index) => (
-                        <motion.div
-                          key={creative.name}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 * index }}
-                          className="glass-card p-4 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 hover:bg-slate-800/40 transition-colors"
-                        >
-                          <div className="flex items-center gap-4 w-full md:w-auto">
-                            <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-2xl border border-slate-700 shadow-inner">
-                              {creative.icon}
+                        <div className="flex flex-col gap-6">
+                          {/* Pie Chart */}
+                          <div className="white-card p-6 relative flex flex-col items-center justify-center">
+                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest absolute top-6 left-6">Chart</h3>
+                            <div className="w-[140px] h-[140px] relative mt-4">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                  <Pie
+                                    data={pieData}
+                                    innerRadius={50}
+                                    outerRadius={65}
+                                    paddingAngle={2}
+                                    dataKey="value"
+                                    stroke="none"
+                                  >
+                                    {pieData.map((entry, index) => (
+                                      <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                  </Pie>
+                                </PieChart>
+                              </ResponsiveContainer>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span className="text-2xl font-bold text-indigo-900">105</span>
+                                <span className="text-[8px] text-gray-400 uppercase">Your Text Here</span>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-bold text-white text-lg">{creative.name}</h4>
-                              <p className="text-sm text-slate-400">Ativo Criativo</p>
+                            <div className="flex flex-wrap justify-center gap-3 mt-4 text-[9px] text-gray-500 font-medium">
+                              <span className="flex items-center gap-1"><div className="w-2 h-2 bg-[#4F46E5] rounded-sm"></div> Lorem ipsum 01</span>
+                              <span className="flex items-center gap-1"><div className="w-2 h-2 bg-[#FBBC05] rounded-sm"></div> Lorem ipsum 02</span>
+                              <span className="flex items-center gap-1"><div className="w-2 h-2 bg-[#EA4335] rounded-sm"></div> Lorem ipsum 03</span>
+                              <span className="flex items-center gap-1"><div className="w-2 h-2 bg-[#0D9488] rounded-sm"></div> Lorem ipsum 04</span>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-8 w-full md:w-auto md:flex items-center">
-                            <div>
-                              <p className="text-xs text-slate-500 uppercase font-bold mb-1">Gasto</p>
-                              <p className="font-semibold text-slate-200">{formatCurrency(creative.spent)}</p>
+                          {/* Mini Cards Row */}
+                          <div className="grid grid-cols-2 gap-6 h-full">
+                            <div className="white-card p-5 flex flex-col justify-center">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase">All Items Download</p>
+                              <p className="text-[9px] text-gray-400 mt-1 mb-2">Lorem ipsum dolor sit amet</p>
+                              <p className="text-2xl font-bold text-[#0D9488] flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4" /> {data.kpis.itemsDownloaded.toLocaleString()}
+                              </p>
                             </div>
-                            <div>
-                              <p className="text-xs text-slate-500 uppercase font-bold mb-1">CPL</p>
-                              <p className="font-semibold text-slate-200">{formatCurrency(creative.cpl)}</p>
-                            </div>
-                            <div className="col-span-2 md:col-span-1 flex justify-end md:ml-8">
-                              <CreativeBadge status={creative.status} />
+                            <div className="white-card p-5 flex flex-col justify-center">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase">Percentage</p>
+                              <p className="text-[9px] text-gray-400 mt-1 mb-2">Lorem ipsum dolor sit amet</p>
+                              <p className="text-2xl font-bold text-[#0D9488] flex items-center gap-1">
+                                <TrendingUp className="w-4 h-4" /> {data.kpis.percentage}%
+                              </p>
                             </div>
                           </div>
-                        </motion.div>
-                      ))}
+                        </div>
+                      </div>
+
+                      {/* IA CONSOLE - Light mode adapted */}
+                      <div className="white-card border-l-4 border-l-brand-blue p-6 mt-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="w-5 h-5 text-brand-yellow" fill="currentColor" />
+                          <h2 className="text-sm font-bold text-indigo-900 uppercase tracking-wide">
+                            AI Preditiva Console
+                          </h2>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                          {data.iaInsight}
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  {activeTab === 'finance' && (
+                    <div className="space-y-6">
+                      <div className="mb-6">
+                        <h3 className="text-2xl font-bold text-indigo-900">Hub Financeiro B2B</h3>
+                        <p className="text-gray-500 mt-1 text-sm">Transparência financeira e geração rápida de relatórios contábeis.</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-6">
+                        {data.finance.map((acc, index) => (
+                          <motion.div
+                            key={acc.account}
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="white-card p-6 flex flex-col md:flex-row justify-between items-center"
+                          >
+                            <div className="mb-6 md:mb-0 w-full md:w-auto">
+                              <h4 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                <Wallet className="w-5 h-5 text-brand-blue" />
+                                {acc.account}
+                              </h4>
+                              <div className="flex items-center gap-4">
+                                <div>
+                                  <p className="text-xs text-gray-400 font-bold uppercase">Saldo Atual</p>
+                                  <p className="text-lg font-bold text-gray-800">{formatCurrency(acc.balance)}</p>
+                                </div>
+                                <div className="h-8 border-l border-gray-200"></div>
+                                <div>
+                                  <p className="text-xs text-gray-400 font-bold uppercase">Verba Aprovada</p>
+                                  <p className="text-lg font-bold text-gray-800">{formatCurrency(acc.approved)}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                              <div className={cn(
+                                "flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold mr-4",
+                                acc.status === 'Conciliado' ? "bg-emerald-50 text-emerald-600" : "bg-yellow-50 text-yellow-600"
+                              )}>
+                                {acc.status === 'Conciliado' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                                {acc.status}
+                              </div>
+
+                              <button
+                                className="flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-indigo-700 text-white py-2.5 px-5 rounded-full font-bold transition-all duration-300 shadow-md shadow-indigo-500/30"
+                                onClick={() => handleGenBoleto(acc.account)}
+                              >
+                                <Receipt className="w-4 h-4" /> Boleto
+                              </button>
+                              <button
+                                className="flex items-center justify-center gap-2 bg-white border-2 border-gray-200 hover:border-[#4F46E5] text-gray-600 hover:text-[#4F46E5] py-2.5 px-5 rounded-full font-bold transition-all duration-300"
+                                onClick={() => handleDownloadNF(acc.account)}
+                              >
+                                <CloudDownload className="w-4 h-4" /> Nota Fiscal
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                </>
+                  )}
+                </motion.div>
               )}
+            </AnimatePresence>
+          </main>
 
-              {activeTab === 'finance' && (
-                <div className="space-y-6">
-                  <div className="mb-8">
-                    <h3 className="text-2xl font-bold text-white">Finanças Inteligentes B2B</h3>
-                    <p className="text-slate-400 mt-2">Emissão em 1-clique e Auditoria em Tempo Real de Gastos vs Invoices.</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {data.finance.map((acc, index) => (
-                      <motion.div
-                        key={acc.account}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="glass-card p-8 flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-8">
-                            <h4 className="text-xl font-bold text-white border-l-4 border-brand-blue pl-3">{acc.account}</h4>
-                            {acc.status === 'Conciliado' ? (
-                              <div className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full text-sm font-medium border border-emerald-500/20">
-                                <CheckCircle2 className="w-4 h-4" /> Conciliado
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full text-sm font-medium border border-amber-500/20">
-                                <AlertCircle className="w-4 h-4" /> {acc.status}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-6 mb-10">
-                            <div>
-                              <p className="text-sm text-slate-400 font-medium mb-1">Saldo Atual da Plataforma</p>
-                              <p className="text-2xl font-bold text-white">{formatCurrency(acc.balance)}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-400 font-medium mb-1">Verba Aprovada (Cliente)</p>
-                              <p className="text-2xl font-bold text-white">{formatCurrency(acc.approved)}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <button
-                            className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-brand-electric text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(37,99,235,0.4)] group"
-                            onClick={() => alert(`Boleto gerado para ${acc.account}`)}
-                          >
-                            <Receipt className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-                            Gerar Boleto
-                          </button>
-                          <button
-                            className="flex-1 flex items-center justify-center gap-2 bg-transparent border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.03]"
-                            onClick={() => alert(`NF baixada para ${acc.account}`)}
-                          >
-                            <CloudDownload className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
-                            Baixar NF
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            </motion.div>
-          </AnimatePresence>
+          {/* Right Fixed Panel (as per image) */}
+          <RightPanel />
         </div>
-      </main>
+      </div>
     </div>
   );
 }

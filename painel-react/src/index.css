@@ -1,46 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dark-bg: #020617;
-  --color-dark-card: rgba(15, 23, 42, 0.5);
-  --color-dark-border: #1e293b;
-  --color-brand-blue: #3B82F6;
-  --color-brand-electric: #2563EB;
-  --color-brand-glow: rgba(59, 130, 246, 0.4);
+  /* Cores Google Baseadas na Referência */
+  --color-brand-blue: #4285F4;
+  /* Azul vibrante (Google Blue) */
+  --color-brand-indigo: #4F46E5;
+  /* Indigo para o sidebar (parecido com a imagem) */
+  --color-brand-red: #EA4335;
+  --color-brand-yellow: #FBBC05;
+  --color-brand-green: #34A853;
+  --color-brand-teal: #0D9488;
+  /* Detalhes esverdeados/teal do gráfico */
+
+  /* Cores Light Mode */
+  --color-light-bg: #F3F4F6;
+  /* Cinza bem claro do fundo geral */
+  --color-light-card: #FFFFFF;
+  /* Branco puro para os cards */
+  --color-light-border: #E5E7EB;
+  /* Bordas suaves gray-200 */
+  --color-light-text: #1F2937;
+  /* Texto principal escuro gray-800 */
+  --color-light-text-muted: #6B7280;
+  /* Texto secundário gray-500 */
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-border-flow: border-flow 3s linear infinite;
-
-  @keyframes border-flow {
-
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-  }
 }
 
 @layer base {
   body {
-    @apply bg-dark-bg text-slate-200 antialiased;
+    @apply bg-light-bg text-light-text antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    @apply bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl shadow-2xl;
+  .white-card {
+    @apply bg-light-card border border-light-border rounded-2xl shadow-sm;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500;
-  }
-
-  .glow-effect {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-indigo;
   }
 }
