@@ -14,23 +14,23 @@ export const PerformanceTab = ({ data, formatCurrency }: Props) => {
     return (
         <>
             {/* IA CONSOLE - Highlighted and Dynamic */}
-            <div className="bg-white rounded-[30px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#4285F4]/10 to-[#EA4335]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000"></div>
+            <div className="google-card p-6 relative overflow-hidden group bg-gradient-to-r from-blue-50/50 to-transparent">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-brand-blue/10 to-brand-red/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform duration-1000"></div>
                 <div className="relative z-10 flex flex-col h-full justify-center">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="bg-[#FBBC05]/20 p-2 rounded-xl">
-                            <Sparkles className="w-5 h-5 text-[#FBBC05]" fill="currentColor" />
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-[#e8f0fe] p-1.5 rounded-md">
+                            <Sparkles className="w-4 h-4 text-brand-blue" fill="currentColor" />
                         </div>
-                        <h2 className="text-sm font-black text-indigo-900 uppercase tracking-widest">
+                        <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
                             IA Executive Summary
                         </h2>
                     </div>
-                    <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium">
+                    <p className="text-base text-text-primary leading-relaxed">
                         {data.iaInsight.split(/(Google Search|Meta Ads|CPL|Fadiga|Escalonamento|Alerta Crítico|Cenário de Escala)/gi).map((part, i) => {
                             const lowerPart = part.toLowerCase();
-                            if (['google search', 'meta ads', 'cpl'].includes(lowerPart)) return <strong key={i} className="text-[#4285F4]">{part}</strong>;
-                            if (['fadiga', 'alerta crítico'].includes(lowerPart)) return <strong key={i} className="text-[#EA4335]">{part}</strong>;
-                            if (['escalonamento', 'cenário de escala'].includes(lowerPart)) return <strong key={i} className="text-[#34A853]">{part}</strong>;
+                            if (['google search', 'meta ads', 'cpl'].includes(lowerPart)) return <strong key={i} className="text-brand-blue font-semibold">{part}</strong>;
+                            if (['fadiga', 'alerta crítico'].includes(lowerPart)) return <strong key={i} className="text-brand-red font-semibold">{part}</strong>;
+                            if (['escalonamento', 'cenário de escala'].includes(lowerPart)) return <strong key={i} className="text-brand-green font-semibold">{part}</strong>;
                             return part;
                         })}
                     </p>
@@ -38,31 +38,31 @@ export const PerformanceTab = ({ data, formatCurrency }: Props) => {
             </div>
 
             {/* Top Chart Area (Overview) */}
-            <div className="bg-white rounded-[30px] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 h-[380px] flex flex-col">
+            <div className="google-card p-6 h-[380px] flex flex-col">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h3 className="text-xl font-bold text-indigo-900">Comparativo CPL Diário</h3>
-                        <p className="text-sm text-gray-500 mt-1">Google Ads vs Meta Ads</p>
+                        <h3 className="text-lg font-medium text-text-primary">Comparativo CPL Diário</h3>
+                        <p className="text-xs text-text-secondary mt-1">Google Ads vs Meta Ads • Últimos 30 dias</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-gray-500"><div className="w-3 h-3 rounded-full bg-[#4285F4]"></div> Google</span>
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-gray-500 ml-3"><div className="w-3 h-3 rounded-full bg-[#EA4335]"></div> Meta</span>
+                    <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1.5 text-xs text-text-secondary"><div className="w-2.5 h-2.5 rounded-sm bg-brand-blue"></div> Google Ads</span>
+                        <span className="flex items-center gap-1.5 text-xs text-text-secondary"><div className="w-2.5 h-2.5 rounded-sm bg-brand-red"></div> Meta Ads</span>
                     </div>
                 </div>
-                <div className="flex-1 min-h-0 relative -ml-4">
+                <div className="flex-1 min-h-0 relative -ml-4 mt-2">
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={data.chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                            <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
-                            <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }} axisLine={false} tickLine={false} tickFormatter={(val) => `R$${val}`} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#dadce0" vertical={false} />
+                            <XAxis dataKey="name" stroke="#80868b" tick={{ fill: '#80868b', fontSize: 11 }} axisLine={false} tickLine={false} dy={10} minTickGap={30} />
+                            <YAxis stroke="#80868b" tick={{ fill: '#80868b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(val) => `R$${val}`} />
                             <RechartsTooltip
-                                contentStyle={{ backgroundColor: '#fff', borderColor: '#e2e8f0', borderRadius: '16px', color: '#1e293b', boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                                itemStyle={{ fontSize: '13px', fontWeight: 700, padding: '4px 0' }}
-                                labelStyle={{ color: '#64748b', marginBottom: '8px', fontWeight: 600, borderBottom: '1px solid #e2e8f0', paddingBottom: '4px' }}
+                                contentStyle={{ backgroundColor: '#fff', borderColor: '#dadce0', borderRadius: '4px', color: '#202124', boxShadow: '0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15)', padding: '12px' }}
+                                itemStyle={{ fontSize: '13px', padding: '4px 0' }}
+                                labelStyle={{ color: '#5f6368', marginBottom: '8px', fontSize: '12px', borderBottom: '1px solid #dadce0', paddingBottom: '4px' }}
                                 formatter={(value: any) => [formatCurrency(Number(value) || 0), undefined]}
                             />
-                            <Area type="monotone" dataKey="meta" name="Meta Ads" stroke="#EA4335" strokeWidth={3} fillOpacity={0.1} fill="#EA4335" activeDot={{ r: 8, strokeWidth: 0, fill: '#EA4335' }} animationDuration={1000} />
-                            <Area type="monotone" dataKey="google" name="Google Ads" stroke="#4285F4" strokeWidth={3} fillOpacity={0.1} fill="#4285F4" activeDot={{ r: 8, strokeWidth: 0, fill: '#4285F4' }} animationDuration={1000} />
+                            <Area type="monotone" dataKey="meta" name="Meta Ads" stroke="var(--color-brand-red)" strokeWidth={2} fillOpacity={0.05} fill="var(--color-brand-red)" activeDot={{ r: 6, strokeWidth: 0, fill: 'var(--color-brand-red)' }} animationDuration={1000} />
+                            <Area type="monotone" dataKey="google" name="Google Ads" stroke="var(--color-brand-blue)" strokeWidth={2} fillOpacity={0.05} fill="var(--color-brand-blue)" activeDot={{ r: 6, strokeWidth: 0, fill: 'var(--color-brand-blue)' }} animationDuration={1000} />
                         </AreaChart>
                     </ResponsiveContainer>
                 </div>
@@ -70,46 +70,55 @@ export const PerformanceTab = ({ data, formatCurrency }: Props) => {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
                 {/* Table Creatives */}
-                <div className="bg-white rounded-[30px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden h-full flex flex-col">
-                    <div className="p-6 md:p-8 pb-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                        <h3 className="text-lg font-bold text-indigo-900">Performance de Criativos</h3>
-                        <button className="text-[#4285F4] text-sm font-bold hover:underline">Ver Todos</button>
+                <div className="google-card overflow-hidden h-full flex flex-col">
+                    <div className="py-4 px-6 border-b border-surface-border flex justify-between items-center bg-white">
+                        <h3 className="text-base font-medium text-text-primary">Performance de Criativos</h3>
+                        <button className="text-brand-blue text-sm hover:underline hover:text-brand-blue-hover transition-colors">Ver Todos</button>
                     </div>
-                    <div className="overflow-x-auto flex-1 p-2">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto flex-1">
+                        <table className="w-full text-left border-collapse min-w-[500px]">
                             <thead>
                                 <tr>
-                                    <th className="py-4 px-6 text-xs font-extrabold text-gray-400 uppercase tracking-wider border-b border-gray-100">Nome do Criativo</th>
-                                    <th className="py-4 px-6 text-xs font-extrabold text-gray-400 uppercase tracking-wider border-b border-gray-100 text-right">Gasto</th>
-                                    <th className="py-4 px-6 text-xs font-extrabold text-gray-400 uppercase tracking-wider border-b border-gray-100 text-center">Análise IA</th>
+                                    <th className="py-3 px-6 text-[11px] font-medium text-text-secondary uppercase tracking-wider border-b border-surface-border w-[45%]">Nome do Criativo</th>
+                                    <th className="py-3 px-6 text-[11px] font-medium text-text-secondary uppercase tracking-wider border-b border-surface-border text-right">Gasto</th>
+                                    <th className="py-3 px-6 text-[11px] font-medium text-text-secondary uppercase tracking-wider border-b border-surface-border text-center">Análise IA</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-surface-border">
                                 {data.creatives.map((creative, i) => (
                                     <motion.tr
                                         key={creative.name}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.1 * i }}
-                                        className="hover:bg-gray-50/80 transition-colors group cursor-pointer"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.05 * i }}
+                                        className="hover:bg-[#f8f9fa] transition-colors group cursor-pointer"
                                     >
-                                        <td className="py-4 px-6 border-b border-gray-50">
-                                            <div className="font-bold text-gray-800 text-sm group-hover:text-[#4285F4] transition-colors">{creative.name}</div>
-                                            <div className="text-xs text-gray-400 mt-1">CPL: {formatCurrency(creative.cpl)}</div>
+                                        <td className="py-3 px-6">
+                                            <div className="flex items-center gap-2">
+                                                <div className={cn(
+                                                    "w-2 h-2 rounded-full",
+                                                    creative.status === 'Escalar' ? "bg-brand-green" :
+                                                        creative.status === 'Trocar' ? "bg-brand-red" : "bg-brand-yellow"
+                                                )}></div>
+                                                <div>
+                                                    <div className="font-medium text-text-primary text-[13px] group-hover:text-brand-blue transition-colors line-clamp-1">{creative.name}</div>
+                                                    <div className="text-[11px] text-text-secondary mt-0.5">CPL: {formatCurrency(creative.cpl)}</div>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td className="py-4 px-6 border-b border-gray-50 text-right font-bold text-indigo-900">
+                                        <td className="py-3 px-6 text-right text-[13px] font-medium text-text-primary">
                                             {formatCurrency(creative.spent)}
                                         </td>
-                                        <td className="py-4 px-6 border-b border-gray-50 text-center">
+                                        <td className="py-3 px-6 text-center">
                                             <span className={cn(
-                                                "px-4 py-1.5 rounded-full text-xs font-bold inline-flex items-center gap-1.5 shadow-sm border whitespace-nowrap",
-                                                creative.status === 'Escalar' && "bg-[#34A853]/10 text-[#34A853] border-[#34A853]/20",
-                                                creative.status === 'Trocar' && "bg-[#EA4335]/10 text-[#EA4335] border-[#EA4335]/20",
-                                                creative.status === 'Manter' && "bg-[#FBBC05]/10 text-yellow-600 border-[#FBBC05]/20"
+                                                "px-2 py-0.5 rounded text-[11px] font-medium inline-flex items-center gap-1 whitespace-nowrap",
+                                                creative.status === 'Escalar' && "bg-[#e6f4ea] text-[#137333]",
+                                                creative.status === 'Trocar' && "bg-[#fce8e6] text-[#c5221f]",
+                                                creative.status === 'Manter' && "bg-[#fef7e0] text-[#b06000]"
                                             )}>
-                                                {creative.status === 'Escalar' && <TrendingUp className="w-3.5 h-3.5" />}
-                                                {creative.status === 'Trocar' && <AlertCircle className="w-3.5 h-3.5" />}
-                                                {creative.status === 'Manter' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                                                {creative.status === 'Escalar' && <TrendingUp className="w-3 h-3" />}
+                                                {creative.status === 'Trocar' && <AlertCircle className="w-3 h-3" />}
+                                                {creative.status === 'Manter' && <CheckCircle2 className="w-3 h-3" />}
                                                 {creative.status === 'Escalar' ? 'Performance Alta - Escalar' :
                                                     creative.status === 'Trocar' ? 'Saturado - Trocar' : 'Estável - Manter'}
                                             </span>
@@ -122,57 +131,79 @@ export const PerformanceTab = ({ data, formatCurrency }: Props) => {
                 </div>
 
                 {/* Top KPIs & Pie Grid */}
-                <div className="flex flex-col gap-6 h-full">
-                    <div className="grid grid-cols-2 gap-4 md:gap-6">
+                <div className="flex flex-col gap-4 h-full">
+                    <div className="grid grid-cols-2 gap-4">
                         {/* Investimento */}
-                        <div className="bg-white rounded-[30px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-center relative overflow-hidden">
-                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-[#4285F4]/5 rounded-full blur-xl"></div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Investimento Total</p>
-                            <p className="text-[10px] text-gray-400 mb-4 font-medium">Platform YTD</p>
-                            <p className="text-xl md:text-2xl lg:text-3xl font-black text-gray-800 mb-2 truncate" title={formatCurrency(data.kpis.spent)}>
+                        <div className="google-card p-5 flex flex-col justify-center relative group">
+                            <p className="text-[11px] font-medium text-text-secondary mb-1 flex items-center justify-between">
+                                Investimento Total
+                                <span className="p-1 hover:bg-surface-hover rounded-full cursor-pointer"><AlertCircle className="w-3 h-3" /></span>
+                            </p>
+                            <p className="text-2xl md:text-3xl font-normal text-text-primary mb-2 tracking-tight">
                                 {formatCurrency(data.kpis.spent)}
                             </p>
+                            <p className="text-[11px] text-text-secondary flex items-center gap-1">
+                                <span className="text-[#137333] font-medium flex items-center"><TrendingUp className="w-3 h-3 mr-0.5" /> 24%</span> vs mês anterior
+                            </p>
+                            {/* Pacing Bar Mock */}
+                            <div className="w-full h-1 bg-surface-border mt-3 rounded-full overflow-hidden">
+                                <div className="h-full bg-brand-blue rounded-full w-[65%]"></div>
+                            </div>
                         </div>
                         {/* Leads */}
-                        <div className="bg-white rounded-[30px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-center relative overflow-hidden">
-                            <div className="absolute -right-4 -top-4 w-20 h-20 bg-[#34A853]/5 rounded-full blur-xl"></div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Leads Totais</p>
-                            <p className="text-[10px] text-gray-400 mb-4 font-medium">CRM Synced</p>
-                            <p className="text-xl md:text-2xl lg:text-3xl font-black text-gray-800 mb-2 truncate">
+                        <div className="google-card p-5 flex flex-col justify-center relative group">
+                            <p className="text-[11px] font-medium text-text-secondary mb-1 flex items-center justify-between">
+                                Leads Totais
+                                <span className="p-1 hover:bg-surface-hover rounded-full cursor-pointer"><AlertCircle className="w-3 h-3" /></span>
+                            </p>
+                            <p className="text-2xl md:text-3xl font-normal text-text-primary mb-2 tracking-tight">
                                 {data.kpis.leads.toLocaleString('pt-BR')}
+                            </p>
+                            <p className="text-[11px] text-text-secondary flex items-center gap-1">
+                                <span className="text-[#137333] font-medium flex items-center"><TrendingUp className="w-3 h-3 mr-0.5" /> 12.5%</span> vs mês anterior
                             </p>
                         </div>
                         {/* CPL */}
-                        <div className="bg-white rounded-[30px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-center relative overflow-hidden">
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">CPL Médio</p>
-                            <p className="text-[10px] text-gray-400 mb-4 font-medium">Cost per Lead</p>
-                            <p className="text-xl md:text-2xl lg:text-3xl font-black text-gray-800 mb-2 truncate">
+                        <div className="google-card p-5 flex flex-col justify-center relative group">
+                            <p className="text-[11px] font-medium text-text-secondary mb-1 flex items-center justify-between">
+                                CPL Médio
+                                <span className="p-1 hover:bg-surface-hover rounded-full cursor-pointer"><AlertCircle className="w-3 h-3" /></span>
+                            </p>
+                            <p className="text-2xl md:text-3xl font-normal text-text-primary mb-2 tracking-tight">
                                 {formatCurrency(data.kpis.cpl)}
+                            </p>
+                            <p className="text-[11px] text-text-secondary flex items-center gap-1">
+                                <span className="text-[#c5221f] font-medium flex items-center"><TrendingUp className="w-3 h-3 mr-0.5" /> 4.2%</span> vs mês anterior
                             </p>
                         </div>
                         {/* ROAS */}
-                        <div className="bg-white rounded-[30px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col justify-center relative overflow-hidden bg-gradient-to-br from-indigo-900 to-[#4F46E5] text-white">
-                            <p className="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-1">ROAS Global</p>
-                            <p className="text-[10px] text-indigo-300 mb-4 font-medium">Return on Ad Spend</p>
-                            <p className="text-xl md:text-2xl lg:text-3xl font-black text-white mb-2 truncate flex items-center gap-2">
-                                {data.kpis.roas}x <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-[#34A853]" />
+                        <div className="google-card p-5 flex flex-col justify-center relative group border-t-4 border-t-brand-blue">
+                            <p className="text-[11px] font-medium text-text-secondary mb-1 flex items-center justify-between">
+                                ROAS Global
+                                <span className="p-1 hover:bg-surface-hover rounded-full cursor-pointer"><AlertCircle className="w-3 h-3" /></span>
+                            </p>
+                            <p className="text-2xl md:text-3xl font-normal text-text-primary mb-2 tracking-tight flex items-center gap-2">
+                                {data.kpis.roas}x
+                            </p>
+                            <p className="text-[11px] text-text-secondary flex items-center gap-1">
+                                Baseline CRM
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-[30px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative flex flex-col items-center justify-center flex-1">
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest absolute top-6 left-6">Platform Distribution</h3>
-                        <div className="w-[150px] h-[150px] md:w-[180px] md:h-[180px] relative mt-8">
+                    <div className="google-card p-6 relative flex flex-col items-center justify-center flex-1">
+                        <h3 className="text-xs font-medium text-text-primary absolute top-4 left-6">Platform Distribution</h3>
+                        <div className="w-[140px] h-[140px] md:w-[160px] md:h-[160px] relative mt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
                                         data={GLOBAL_PIE_DATA}
-                                        innerRadius={65}
-                                        outerRadius={85}
-                                        paddingAngle={4}
+                                        innerRadius={55}
+                                        outerRadius={75}
+                                        paddingAngle={2}
                                         dataKey="value"
                                         stroke="none"
-                                        cornerRadius={6}
+                                        cornerRadius={2}
                                     >
                                         {GLOBAL_PIE_DATA.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -181,8 +212,8 @@ export const PerformanceTab = ({ data, formatCurrency }: Props) => {
                                 </PieChart>
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-2xl md:text-3xl font-black text-indigo-900">4</span>
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Fontes</span>
+                                <span className="text-xl font-medium text-text-primary">4</span>
+                                <span className="text-[10px] text-text-secondary mt-0.5">Fontes</span>
                             </div>
                         </div>
                     </div>

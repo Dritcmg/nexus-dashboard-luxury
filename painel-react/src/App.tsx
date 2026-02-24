@@ -67,9 +67,9 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F6F9] text-gray-800 font-sans selection:bg-[#4285F4]/30 overflow-hidden flex flex-col md:flex-row relative">
+    <div className="min-h-screen bg-surface-bg text-text-primary font-sans selection:bg-[#e8f0fe] selection:text-brand-blue overflow-hidden flex flex-col md:flex-row relative">
       <Toaster position="bottom-right" className="!font-sans" toastOptions={{
-        style: { borderRadius: '16px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }
+        style: { borderRadius: '8px', border: '1px solid #dadce0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', color: '#202124' }
       }} />
 
       <Sidebar
@@ -82,16 +82,16 @@ export default function App() {
         setIsOpen={setIsMobileMenuOpen}
       />
 
-      <div className="flex-1 md:ml-24 flex flex-col min-h-screen overflow-y-auto overflow-x-hidden w-full relative">
+      <div className="flex-1 md:ml-20 flex flex-col min-h-screen overflow-y-auto overflow-x-hidden w-full relative">
         <Header
           client={client}
           setClient={setClient}
           onMenuClick={() => setIsMobileMenuOpen(true)}
         />
 
-        <div className="flex-1 flex flex-col lg:flex-row w-full max-w-[2000px] mx-auto">
+        <div className="flex-1 flex flex-col lg:flex-row w-full max-w-[1600px] mx-auto">
           {/* Main Contextual Area */}
-          <main className="flex-1 px-4 sm:px-6 lg:px-8 pb-10 w-full xl:max-w-[1200px]">
+          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 w-full lg:max-w-4xl xl:max-w-5xl">
             <AnimatePresence mode="wait">
               {isLoading ? (
                 activeTab === 'performance' ? <PerformanceSkeleton key="skel-perf" /> : <BasicSkeleton key="skel-basic" />

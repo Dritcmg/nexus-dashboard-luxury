@@ -12,43 +12,42 @@ export const RightPanel = ({ clientData, clientName }: RightPanelProps) => {
         new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumSignificantDigits: 3 }).format(val);
 
     return (
-        <div className="w-full lg:w-[320px] bg-[#4F46E5] text-white flex flex-col items-center py-10 px-8 lg:rounded-l-[40px] shadow-2xl relative shrink-0">
-            <div className="relative mb-6 group cursor-pointer">
-                <div className="w-32 h-32 rounded-full bg-white/10 p-2 group-hover:bg-white/20 transition-colors">
-                    <div className="w-full h-full rounded-full bg-indigo-100 flex items-center justify-center overflow-hidden">
-                        <User className="w-16 h-16 text-indigo-300" fill="currentColor" />
+        <div className="w-full lg:w-[320px] bg-surface-bg border-l border-surface-border flex flex-col items-center py-6 px-6 relative shrink-0">
+            <div className="relative mb-6 group cursor-pointer mt-4">
+                <div className="w-24 h-24 rounded-full bg-white p-1.5 border border-surface-border shadow-sm group-hover:shadow-md transition-shadow">
+                    <div className="w-full h-full rounded-full bg-brand-blue/10 flex items-center justify-center overflow-hidden">
+                        <User className="w-12 h-12 text-brand-blue" fill="currentColor" />
                     </div>
                 </div>
-                <div className="absolute top-2 right-2 w-6 h-6 bg-[#34A853] rounded-full border-4 border-[#4F46E5]"></div>
             </div>
-            <h2 className="text-xl md:text-2xl font-bold mb-8 tracking-tight text-center">{clientName}</h2>
+            <h2 className="text-lg font-medium mb-8 text-text-primary text-center tracking-tight">{clientName}</h2>
 
-            <div className="flex w-full justify-between bg-[#3730A3] p-5 rounded-3xl mb-10 text-center shadow-inner">
+            <div className="flex w-full justify-between bg-white border border-surface-border p-5 rounded-xl mb-10 text-center shadow-sm">
                 <div>
-                    <p className="text-[10px] text-indigo-200 mb-1 uppercase tracking-wider font-semibold">Spend</p>
-                    <p className="text-[#34A853] font-black text-lg xl:text-xl" title={String(clientData.kpis.spent)}>{formatCurrency(clientData.kpis.spent)}</p>
-                    <p className="text-[9px] text-indigo-300 mt-1">Platform YTD</p>
+                    <p className="text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-semibold">Spend</p>
+                    <p className="text-text-primary font-medium text-lg" title={String(clientData.kpis.spent)}>{formatCurrency(clientData.kpis.spent)}</p>
+                    <p className="text-[10px] text-text-tertiary mt-1 flex items-center justify-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Platform YTD</p>
                 </div>
                 <div>
-                    <p className="text-[10px] text-indigo-200 mb-1 uppercase tracking-wider font-semibold">Leads</p>
-                    <p className="text-[#34A853] font-black text-lg xl:text-xl">{clientData.kpis.leads > 1000 ? (clientData.kpis.leads / 1000).toFixed(1) + 'k' : clientData.kpis.leads}</p>
-                    <p className="text-[9px] text-indigo-300 mt-1">CRM Synced</p>
+                    <p className="text-[10px] text-text-secondary mb-1 uppercase tracking-wider font-semibold">Leads</p>
+                    <p className="text-brand-blue font-medium text-lg">{clientData.kpis.leads > 1000 ? (clientData.kpis.leads / 1000).toFixed(1) + 'k' : clientData.kpis.leads}</p>
+                    <p className="text-[10px] text-text-tertiary mt-1">CRM Synced</p>
                 </div>
             </div>
 
             <div className="w-full">
-                <h3 className="text-sm font-bold mb-6 text-indigo-50">Overall Stats</h3>
+                <h3 className="text-sm font-medium mb-4 text-text-primary px-2 border-b border-surface-border pb-2">Overall Stats</h3>
                 <div className="space-y-6">
-                    <div className="h-40 w-full">
+                    <div className="h-40 w-full mt-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={clientData.platformDistribution}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={40}
-                                    outerRadius={60}
-                                    paddingAngle={5}
+                                    innerRadius={45}
+                                    outerRadius={65}
+                                    paddingAngle={2}
                                     dataKey="value"
                                     stroke="none"
                                 >
@@ -57,20 +56,20 @@ export const RightPanel = ({ clientData, clientName }: RightPanelProps) => {
                                     ))}
                                 </Pie>
                                 <RechartsTooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-                                    itemStyle={{ color: '#1F2937', fontWeight: 'bold' }}
+                                    contentStyle={{ borderRadius: '4px', border: '1px solid #dadce0', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
+                                    itemStyle={{ color: '#202124', fontSize: '12px' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className="flex flex-col gap-2 mt-2">
+                    <div className="flex flex-col gap-3 mt-4 px-2">
                         {clientData.platformDistribution.map((platform) => (
                             <div key={platform.name} className="flex items-center justify-between text-xs">
                                 <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: platform.color }}></span>
-                                    <span className="text-indigo-100 font-medium">{platform.name}</span>
+                                    <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: platform.color }}></span>
+                                    <span className="text-text-secondary font-medium">{platform.name}</span>
                                 </div>
-                                <span className="font-bold text-white">{platform.value}%</span>
+                                <span className="font-medium text-text-primary">{platform.value}%</span>
                             </div>
                         ))}
                     </div>

@@ -1,45 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  /* Cores Google Baseadas na Referência */
-  --color-brand-blue: #4285F4;
-  /* Azul vibrante (Google Blue) */
-  --color-brand-indigo: #4F46E5;
-  /* Indigo para o sidebar (parecido com a imagem) */
-  --color-brand-red: #EA4335;
-  --color-brand-yellow: #FBBC05;
-  --color-brand-green: #34A853;
-  --color-brand-teal: #0D9488;
-  /* Detalhes esverdeados/teal do gráfico */
+  /* Google Ads Primary Palette */
+  --color-brand-blue: #1a73e8;
+  /* Official Google Blue */
+  --color-brand-blue-hover: #174ea6;
+  --color-brand-red: #ea4335;
+  --color-brand-yellow: #fbbc04;
+  --color-brand-green: #188038;
+  --color-brand-teal: #007b83;
 
-  /* Cores Light Mode */
-  --color-light-bg: #F3F4F6;
-  /* Cinza bem claro do fundo geral */
-  --color-light-card: #FFFFFF;
-  /* Branco puro para os cards */
-  --color-light-border: #E5E7EB;
-  /* Bordas suaves gray-200 */
-  --color-light-text: #1F2937;
-  /* Texto principal escuro gray-800 */
-  --color-light-text-muted: #6B7280;
-  /* Texto secundário gray-500 */
+  /* Material Design 3 Surface Colors */
+  --color-surface-bg: #f8f9fa;
+  /* Very Light Gray Background */
+  --color-surface-card: #ffffff;
+  /* Pure White Cards */
+  --color-surface-hover: #f1f3f4;
+  /* Subtle Hover State */
+  --color-surface-border: #dadce0;
+  /* Google Standard Border */
+
+  /* Typography Colors */
+  --color-text-primary: #202124;
+  /* Google Dark Gray/Black */
+  --color-text-secondary: #5f6368;
+  /* Google Subtitle Gray */
+  --color-text-tertiary: #80868b;
+  /* Lighter Gray for hints/disabled */
 
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @layer base {
   body {
-    @apply bg-light-bg text-light-text antialiased;
+    @apply bg-surface-bg text-text-primary antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
 @layer utilities {
-  .white-card {
-    @apply bg-light-card border border-light-border rounded-2xl shadow-sm;
+  .google-card {
+    @apply bg-surface-card border border-surface-border rounded-lg shadow-sm transition-shadow hover:shadow-md;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-indigo;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-brand-blue-hover;
   }
 }
